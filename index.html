@@ -24,6 +24,11 @@ h1{margin:0;font-size:23px;letter-spacing:-.03em;}
 .search input{min-width:0;flex:1;border:0;outline:0;font-size:16px;}
 .cam{flex:0 0 56px;height:56px;border:0;border-radius:14px;background:#12492b;color:#fff;font-size:26px;display:grid;place-items:center;box-shadow:0 8px 20px rgba(7,37,20,.25);}
 .cam:active{background:#0d3a22;}
+.whfilter{display:flex;gap:8px;padding:12px 18px 0;}
+.whfilter button{flex:1;min-height:44px;padding:8px 6px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:#61665f;font-size:13px;font-weight:800;line-height:1.2;}
+.whfilter button .fc{display:block;font-size:15px;margin-top:2px;color:var(--muted);font-weight:700;}
+.whfilter button.sel{border-color:var(--green);background:var(--soft);color:var(--green);box-shadow:0 0 0 1px var(--green);}
+.whfilter button.sel .fc{color:var(--green);}
 .notice{display:flex;justify-content:space-between;align-items:center;gap:10px;width:calc(100% - 36px);margin:14px 18px 0;padding:13px 15px;border:0;border-radius:12px;text-align:left;font-size:14px;font-weight:600;}
 .notice.info{background:#fff1c9;color:#755814;}
 .notice.err{background:#fde3df;color:#8f2c1e;}
@@ -43,6 +48,8 @@ h1{margin:0;font-size:23px;letter-spacing:-.03em;}
 .whbox .wv{font-size:22px;font-weight:800;}
 .whbox .wv small{font-size:12px;font-weight:600;color:var(--muted);margin-left:2px;}
 .whbox.zero .wv{color:#b9b9b3;}
+.whbox.hl{background:var(--soft);box-shadow:inset 0 0 0 1.5px var(--green);}
+.whbox.hl .wv{color:var(--green);}
 .empty{padding:44px 0;text-align:center;color:var(--muted);}
 .hint{padding:34px 14px;text-align:center;color:var(--muted);font-size:14px;line-height:1.6;}
 .backdrop{position:fixed;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center;background:rgba(12,20,14,.5);}
@@ -100,6 +107,7 @@ select.staff{width:100%;height:56px;padding:0 14px;border:1px solid #d7d8d3;bord
     <label class="search"><span>⌕</span><input id="search" inputmode="search" placeholder="제품명 / 바코드 검색" aria-label="제품 검색" /></label>
     <button id="camBtn" class="cam" aria-label="바코드 스캔">▣</button>
   </div>
+  <div id="whFilter" class="whfilter"></div>
   <div id="notice"></div>
   <section class="content">
     <div class="section-title"><h2 id="listTitle">제품</h2><span id="listCount"></span></div>
@@ -138,6 +146,7 @@ function notice(kind, msg) {
 }
 let WAREHOUSES = [], WH_BY_ID = {}, WH_BY_CODE = {}, STAFF = [];
 let selected = null, selWh = null, quantity = 1, searchTimer = null;
+let whFilter = "ALL";
 async function init() {
   try {
     const [wh, staff] = await Promise.all([
@@ -147,11 +156,18 @@ async function init() {
     WAREHOUSES = wh; STAFF = staff; WH_BY_ID = {}; WH_BY_CODE = {};
     wh.forEach((w) => { WH_BY_ID[w.id] = w; WH_BY_CODE[w.code] = w; });
     $("status").className = "status ok"; $("status").innerHTML = "<i></i>서버 연결됨";
+    renderWhFilter();
     loadProducts("");
   } catch (e) {
     $("status").className = "status"; $("status").innerHTML = "<i></i>연결 실패";
     notice("err", "서버 연결 실패: " + e.message);
   }
+}
+function renderWhFilter() {
+  const el = $("whFilter"); if (!el) return;
+  const btn = (code, label) => `<button data-c="${code}" class="${whFilter === code ? "sel" : ""}">${label}</button>`;
+  el.innerHTML = btn("ALL", "전체") + WH_ORDER.map((c) => { const w = WH_BY_CODE[c]; return btn(c, `<span class="fc">${esc(w ? w.warehouse_name : c)}</span>`); }).join("");
+  el.querySelectorAll("button").forEach((b) => b.onclick = () => { whFilter = b.dataset.c; renderWhFilter(); loadProducts($("search").value); });
 }
 function stocksFromInventory(inv) {
   const s = {}; WH_ORDER.forEach((c) => s[c] = 0);
@@ -174,17 +190,22 @@ async function loadProducts(term) {
   $("listCount").innerHTML = '<span class="spinner"></span>';
   try {
     const filter = q ? buildSearchFilter(q) : "";
-    // 검색 전 첫 화면: 재고가 입력된(수량>0) 상품만 노출(inner join). 검색 시: 전체 대상.
-    const inv = q ? "inventory(warehouse_id,quantity)" : "inventory!inner(warehouse_id,quantity)";
-    const stockFilter = q ? "" : "&inventory.quantity=gt.0";
-    const sel = `select=id,product_code,barcode,product_name,unit,category,${inv}`;
-    const rows = await api(`products?${sel}&active=eq.true${filter}${stockFilter}&order=product_name&limit=60`);
-    // 재고(노형+외도)가 있는 상품을 상단으로, 그 안에서는 가나다순
+    let cond = "", extra = "";
+    if (whFilter !== "ALL") {
+      const w = WH_BY_CODE[whFilter];
+      cond = ",chk:inventory!inner(warehouse_id,quantity)";
+      extra = w ? `&chk.warehouse_id=eq.${w.id}&chk.quantity=gt.0` : "";
+    } else if (!q) {
+      cond = ",chk:inventory!inner(warehouse_id,quantity)";
+      extra = "&chk.quantity=gt.0";
+    }
+    const sel = `select=id,product_code,barcode,product_name,unit,category,inventory(warehouse_id,quantity)${cond}`;
+    const rows = await api(`products?${sel}&active=eq.true${filter}${extra}&order=product_name&limit=60`);
+    const stockOf = (p) => { const s = stocksFromInventory(p.inventory); return whFilter === "ALL" ? WH_ORDER.reduce((n, c) => n + (s[c] || 0), 0) : (s[whFilter] || 0); };
     rows.sort((a, b) => {
-      const sa = stocksFromInventory(a.inventory), sb = stocksFromInventory(b.inventory);
-      const ta = WH_ORDER.reduce((n, c) => n + (sa[c] || 0), 0);
-      const tb = WH_ORDER.reduce((n, c) => n + (sb[c] || 0), 0);
+      const ta = stockOf(a), tb = stockOf(b);
       if ((ta > 0) !== (tb > 0)) return ta > 0 ? -1 : 1;
+      if (whFilter !== "ALL" && tb !== ta) return tb - ta;
       return String(a.product_name).localeCompare(String(b.product_name), "ko");
     });
     renderList(rows, q);
@@ -202,7 +223,8 @@ function renderList(rows, q) {
 }
 function whBox(code, qty, unit) {
   const w = WH_BY_CODE[code]; if (!w) return "";
-  return `<div class="whbox ${qty <= 0 ? "zero" : ""}"><div class="wl">${esc(w.warehouse_name)}</div><div class="wv">${qty}<small>${esc(unit || "")}</small></div></div>`;
+  const hl = (whFilter !== "ALL" && whFilter === code) ? " hl" : "";
+  return `<div class="whbox ${qty <= 0 ? "zero" : ""}${hl}"><div class="wl">${esc(w.warehouse_name)}</div><div class="wv">${qty}<small>${esc(unit || "")}</small></div></div>`;
 }
 $("search").addEventListener("input", (e) => { clearTimeout(searchTimer); searchTimer = setTimeout(() => loadProducts(e.target.value), 280); });
 function openSheet(product, stocks) {

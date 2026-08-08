@@ -174,15 +174,26 @@ async function loadProducts(term) {
   $("listCount").innerHTML = '<span class="spinner"></span>';
   try {
     const filter = q ? buildSearchFilter(q) : "";
-    const sel = "select=id,product_code,barcode,product_name,unit,category,inventory(warehouse_id,quantity)";
-    const rows = await api(`products?${sel}&active=eq.true${filter}&order=product_name&limit=40`);
+    // 검색 전 첫 화면: 재고가 입력된(수량>0) 상품만 노출(inner join). 검색 시: 전체 대상.
+    const inv = q ? "inventory(warehouse_id,quantity)" : "inventory!inner(warehouse_id,quantity)";
+    const stockFilter = q ? "" : "&inventory.quantity=gt.0";
+    const sel = `select=id,product_code,barcode,product_name,unit,category,${inv}`;
+    const rows = await api(`products?${sel}&active=eq.true${filter}${stockFilter}&order=product_name&limit=60`);
+    // 재고(노형+외도)가 있는 상품을 상단으로, 그 안에서는 가나다순
+    rows.sort((a, b) => {
+      const sa = stocksFromInventory(a.inventory), sb = stocksFromInventory(b.inventory);
+      const ta = WH_ORDER.reduce((n, c) => n + (sa[c] || 0), 0);
+      const tb = WH_ORDER.reduce((n, c) => n + (sb[c] || 0), 0);
+      if ((ta > 0) !== (tb > 0)) return ta > 0 ? -1 : 1;
+      return String(a.product_name).localeCompare(String(b.product_name), "ko");
+    });
     renderList(rows, q);
   } catch (e) { $("listCount").textContent = ""; notice("err", "검색 오류: " + e.message); }
 }
 function renderList(rows, q) {
   $("listCount").textContent = `${rows.length}개`;
   const el = $("list");
-  if (!rows.length) { el.innerHTML = q ? `<div class="empty">일치하는 제품이 없습니다.</div>` : ""; return; }
+  if (!rows.length) { el.innerHTML = q ? `<div class="empty">일치하는 제품이 없습니다.</div>` : `<div class="empty">재고가 있는 제품이 없습니다.</div>`; return; }
   el.innerHTML = rows.map((p) => {
     const s = stocksFromInventory(p.inventory);
     return `<button class="card" data-id="${esc(p.id)}"><div class="pname">${esc(p.product_name)}</div><div class="pspec">${esc(p.category || "")}${p.category ? " · " : ""}${esc(p.product_code)}</div><div class="whrow">${WH_ORDER.map((c) => whBox(c, s[c], p.unit)).join("")}</div></button>`;

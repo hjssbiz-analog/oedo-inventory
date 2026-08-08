@@ -2,389 +2,345 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>외도창고 재고관리</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#1f6a3d" />
+<title>형제상사 창고재고</title>
 <style>
-:root { --ink:#172019; --green:#1f6a3d; --green-soft:#e7f2e9; --cream:#f6f3eb; --line:#e5e3dc; --muted:#747b74; }
-* { box-sizing:border-box; }
-body { margin:0; background:#eceae3; color:var(--ink); font-family:Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif; }
-button,input { font:inherit; }
-button { color:inherit; cursor:pointer; }
-main { width:min(100%,520px); min-height:100vh; margin:0 auto; background:#fbfaf6; padding-bottom:92px; box-shadow:0 0 40px rgba(25,35,28,.08); }
-.topbar { display:flex; align-items:center; justify-content:space-between; padding:24px 22px 16px; background:#fff; }
-.eyebrow { margin:0 0 3px; color:var(--green); font-size:12px; font-weight:800; letter-spacing:.08em; }
-h1 { margin:0; font-size:25px; letter-spacing:-.04em; }
-.status { display:flex; align-items:center; gap:7px; padding:8px 11px; border-radius:999px; background:#f1efe7; color:#716f67; font-size:12px; font-weight:700; }
-.status i { width:7px; height:7px; border-radius:50%; background:#d09b31; }
-.status.connected { background:var(--green-soft); color:var(--green); }
-.status.connected i { background:#2e9358; }
-.hero { padding:22px; background:var(--green); color:white; border-radius:0 0 28px 28px; }
-.hero p { margin:0 0 16px; color:#d9eadf; font-size:14px; }
-.search { display:flex; align-items:center; gap:10px; height:52px; padding:0 16px; border-radius:15px; background:white; color:var(--ink); box-shadow:0 9px 24px rgba(7,37,20,.18); }
-.search span { font-size:27px; transform:rotate(-15deg); }
-.search input { min-width:0; flex:1; border:0; outline:0; font-size:15px; }
-.search input::placeholder { color:#9a9e99; }
-.notice { display:flex; justify-content:space-between; width:calc(100% - 44px); margin:16px 22px 0; padding:13px 15px; border:0; border-radius:12px; background:#fff1c9; color:#755814; text-align:left; font-size:13px; }
-.content { padding:22px; }
-.section-title { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:12px; }
-.section-title h2 { margin:0; font-size:17px; letter-spacing:-.02em; }
-.section-title span { color:var(--muted); font-size:12px; }
-.product-list { display:grid; gap:9px; }
-.product { display:flex; align-items:center; gap:12px; width:100%; padding:14px; border:1px solid var(--line); border-radius:15px; background:#fff; text-align:left; box-shadow:0 3px 9px rgba(28,37,30,.03); }
-.product:active { transform:scale(.99); background:#f8faf7; }
-.category { flex:0 0 45px; height:45px; display:grid; place-items:center; border-radius:12px; background:var(--green-soft); color:var(--green); font-size:11px; font-weight:800; }
-.product-copy { min-width:0; flex:1; display:grid; gap:5px; }
-.product-copy strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; }
-.product-copy small,.movement small { color:var(--muted); font-size:11px; }
-.stock { min-width:46px; text-align:right; }
-.stock b { font-size:21px; }
-.stock small { margin-left:2px; color:var(--muted); }
-.stock.low b { color:#c36138; }
-.empty { padding:45px 0; text-align:center; color:var(--muted); }
-.recent { margin-top:28px; }
-.movement { display:flex; align-items:center; gap:11px; padding:12px 4px; border-bottom:1px solid var(--line); }
-.movement div { display:grid; gap:4px; }
-.movement strong { font-size:13px; }
-.check { display:grid; place-items:center; width:27px; height:27px; border-radius:50%; background:var(--green-soft); color:var(--green); font-weight:900; }
-.check.inbound { background:#e7f2e9; }
-.bottom-nav { position:fixed; bottom:0; left:50%; z-index:10; display:flex; width:min(100%,520px); height:74px; transform:translateX(-50%); border-top:1px solid var(--line); background:rgba(255,255,255,.96); backdrop-filter:blur(12px); }
-.bottom-nav button { flex:1; display:grid; place-items:center; gap:3px; border:0; background:none; color:#90938e; font-size:10px; }
-.bottom-nav button span { font-size:21px; line-height:1; }
-.bottom-nav .active { color:var(--green); font-weight:800; }
-.sheet-backdrop { position:fixed; inset:0; z-index:20; display:flex; align-items:flex-end; justify-content:center; background:rgba(12,20,14,.46); }
-.sheet { width:min(100%,520px); padding:10px 22px 26px; border-radius:26px 26px 0 0; background:#fff; box-shadow:0 -10px 50px rgba(0,0,0,.2); }
-.handle { width:42px; height:4px; margin:0 auto 18px; border-radius:3px; background:#d9d9d5; }
-.sheet-head { display:flex; justify-content:space-between; gap:14px; }
-.sheet-head p { margin:0 0 5px; color:var(--green); font-size:12px; font-weight:800; }
-.sheet-head h2 { margin:0; font-size:20px; }
-.sheet-head button { width:34px; height:34px; border:0; border-radius:50%; background:#f1f1ed; font-size:23px; }
-.availability { display:flex; align-items:center; justify-content:space-between; margin:20px 0; padding:16px; border-radius:14px; background:var(--cream); }
-.availability span { font-size:13px; color:var(--muted); }
-.availability strong { color:var(--green); font-size:20px; }
-.movement-tabs { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:0 0 18px; }
-.movement-tabs button { min-height:48px; padding:8px; border:1px solid #d7d8d3; border-radius:12px; background:#fff; color:#777d77; font-size:12px; font-weight:800; }
-.movement-tabs button.active { border-color:var(--green); background:var(--green-soft); color:var(--green); box-shadow:0 0 0 1px var(--green); }
-.field { display:block; margin-top:16px; }
-.field > span { display:block; margin-bottom:8px; font-size:13px; font-weight:800; }
-.field input { width:100%; height:48px; padding:0 14px; border:1px solid #d7d8d3; border-radius:12px; outline:0; }
-.field input:focus { border-color:var(--green); box-shadow:0 0 0 3px var(--green-soft); }
-.stepper { display:flex; align-items:center; justify-content:space-between; height:50px; border:1px solid #d7d8d3; border-radius:12px; overflow:hidden; }
-.stepper button { width:60px; height:100%; border:0; background:#f6f6f2; font-size:22px; }
-.stepper strong { font-size:20px; }
-.stepper input { width:100%; height:100%; min-width:0; flex:1; border:0; outline:0; text-align:center; font-size:20px; font-weight:800; background:transparent; }
-.primary { width:100%; height:54px; margin-top:22px; border:0; border-radius:14px; background:var(--green); color:#fff; font-weight:800; }
-.primary.inbound { background:#255f99; }
-.primary:disabled { opacity:.5; }
-.history { margin-top:22px; border-top:1px solid var(--line); padding-top:14px; }
-.history-title { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px; }
-.history-title h3 { margin:0; font-size:14px; }
-.history-title span { color:var(--muted); font-size:11px; }
-.history-scroll { max-height:200px; overflow-y:auto; }
-.hrow { display:flex; align-items:center; gap:10px; padding:9px 2px; border-bottom:1px solid #f0efe9; }
-.hrow:last-child { border-bottom:0; }
-.hbadge { flex:0 0 24px; height:24px; display:grid; place-items:center; border-radius:50%; font-weight:900; font-size:13px; background:var(--green-soft); color:var(--green); }
-.hrow .hmeta { flex:1; min-width:0; display:grid; gap:2px; }
-.hrow .hmeta small { color:var(--muted); font-size:10px; }
-.hrow .hqty { font-size:13px; font-weight:800; white-space:nowrap; }
-.history .empty { padding:22px 0; font-size:12px; }
-.stock-list { display:grid; gap:0; border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#fff; }
-.srow { display:flex; align-items:center; gap:12px; padding:13px 14px; border-bottom:1px solid #f0efe9; }
-.srow:last-child { border-bottom:0; }
-.srow .sname { flex:1; min-width:0; display:grid; gap:3px; }
-.srow .sname strong { font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.srow .sname small { color:var(--muted); font-size:11px; }
-.srow .sqty { min-width:64px; text-align:right; font-weight:800; }
-.srow .sqty b { font-size:19px; color:var(--green); }
-.srow .sqty.low b { color:#c36138; }
-.srow .sqty small { margin-left:2px; color:var(--muted); font-weight:400; }
-@media (min-width:521px) { main { min-height:calc(100vh - 32px); margin-top:16px; border-radius:24px 24px 0 0; overflow:hidden; } }
+:root{--ink:#172019;--green:#1f6a3d;--green2:#2e9358;--soft:#e7f2e9;--cream:#f6f3eb;--line:#e5e3dc;--muted:#747b74;--red:#c0392b;--blue:#255f99;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{margin:0;background:#eceae3;color:var(--ink);font-family:Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;}
+button,input,select{font:inherit;}
+button{color:inherit;cursor:pointer;}
+main{width:min(100%,560px);min-height:100vh;margin:0 auto;background:#fbfaf6;padding-bottom:32px;box-shadow:0 0 40px rgba(25,35,28,.08);}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 18px 14px;background:#fff;}
+.eyebrow{margin:0 0 3px;color:var(--green);font-size:12px;font-weight:800;letter-spacing:.06em;}
+h1{margin:0;font-size:23px;letter-spacing:-.03em;}
+.status{display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:#f1efe7;color:#716f67;font-size:11px;font-weight:700;}
+.status i{width:7px;height:7px;border-radius:50%;background:#d09b31;}
+.status.ok{background:var(--soft);color:var(--green);}.status.ok i{background:var(--green2);}
+.searchbar{display:flex;gap:10px;padding:16px 18px;background:var(--green);}
+.search{flex:1;display:flex;align-items:center;gap:8px;height:56px;padding:0 14px;border-radius:14px;background:#fff;box-shadow:0 8px 20px rgba(7,37,20,.18);}
+.search span{font-size:24px;transform:rotate(-12deg);}
+.search input{min-width:0;flex:1;border:0;outline:0;font-size:16px;}
+.cam{flex:0 0 56px;height:56px;border:0;border-radius:14px;background:#12492b;color:#fff;font-size:26px;display:grid;place-items:center;box-shadow:0 8px 20px rgba(7,37,20,.25);}
+.cam:active{background:#0d3a22;}
+.notice{display:flex;justify-content:space-between;align-items:center;gap:10px;width:calc(100% - 36px);margin:14px 18px 0;padding:13px 15px;border:0;border-radius:12px;text-align:left;font-size:14px;font-weight:600;}
+.notice.info{background:#fff1c9;color:#755814;}
+.notice.err{background:#fde3df;color:#8f2c1e;}
+.notice.ok{background:var(--soft);color:var(--green);}
+.content{padding:16px 18px;}
+.section-title{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;}
+.section-title h2{margin:0;font-size:16px;}
+.section-title span{color:var(--muted);font-size:12px;}
+.list{display:grid;gap:10px;}
+.card{display:block;width:100%;padding:15px;border:1px solid var(--line);border-radius:16px;background:#fff;text-align:left;box-shadow:0 3px 9px rgba(28,37,30,.04);}
+.card:active{background:#f8faf7;}
+.card .pname{font-size:17px;font-weight:800;line-height:1.25;}
+.card .pspec{margin-top:3px;color:var(--muted);font-size:12px;}
+.whrow{display:flex;gap:10px;margin-top:12px;}
+.whbox{flex:1;padding:10px 12px;border-radius:12px;background:var(--cream);}
+.whbox .wl{font-size:12px;color:var(--muted);}
+.whbox .wv{font-size:22px;font-weight:800;}
+.whbox .wv small{font-size:12px;font-weight:600;color:var(--muted);margin-left:2px;}
+.whbox.zero .wv{color:#b9b9b3;}
+.empty{padding:44px 0;text-align:center;color:var(--muted);}
+.hint{padding:34px 14px;text-align:center;color:var(--muted);font-size:14px;line-height:1.6;}
+.backdrop{position:fixed;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center;background:rgba(12,20,14,.5);}
+.sheet{width:min(100%,560px);max-height:92vh;overflow-y:auto;padding:8px 18px 26px;border-radius:24px 24px 0 0;background:#fff;box-shadow:0 -10px 50px rgba(0,0,0,.25);}
+.handle{width:42px;height:4px;margin:8px auto 14px;border-radius:3px;background:#d9d9d5;}
+.sheet-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;}
+.sheet-head .code{color:var(--green);font-size:12px;font-weight:800;margin:0 0 4px;}
+.sheet-head h2{margin:0;font-size:21px;line-height:1.25;}
+.sheet-head .x{flex:0 0 auto;width:34px;height:34px;border:0;border-radius:50%;background:#f1f1ed;font-size:22px;}
+.big-wh{display:flex;gap:10px;margin:16px 0 6px;}
+.big-wh button{flex:1;padding:14px 10px;border:2px solid var(--line);border-radius:16px;background:#fff;text-align:center;}
+.big-wh button .l{font-size:13px;color:var(--muted);}
+.big-wh button .v{font-size:26px;font-weight:800;margin-top:2px;}
+.big-wh button .v small{font-size:13px;color:var(--muted);font-weight:600;}
+.big-wh button.sel{border-color:var(--green);background:var(--soft);box-shadow:0 0 0 1px var(--green);}
+.big-wh button.sel .v{color:var(--green);}
+.big-wh button:disabled{opacity:.45;}
+.field{margin-top:16px;}
+.field>label{display:block;margin-bottom:8px;font-size:14px;font-weight:800;}
+.stepper{display:flex;align-items:center;justify-content:space-between;height:60px;border:1px solid #d7d8d3;border-radius:14px;overflow:hidden;}
+.stepper button{width:76px;height:100%;border:0;background:#f2f2ee;font-size:30px;}
+.stepper button:active{background:#e6e6e0;}
+.stepper input{width:100%;flex:1;min-width:0;border:0;outline:0;text-align:center;font-size:26px;font-weight:800;background:transparent;}
+select.staff{width:100%;height:56px;padding:0 14px;border:1px solid #d7d8d3;border-radius:14px;background:#fff;font-size:17px;}
+.primary{width:100%;height:60px;margin-top:20px;border:0;border-radius:16px;background:var(--green);color:#fff;font-weight:800;font-size:18px;}
+.primary:disabled{opacity:.45;}
+.warn{margin-top:10px;color:var(--red);font-size:14px;font-weight:700;text-align:center;}
+.hist{margin-top:22px;border-top:1px solid var(--line);padding-top:14px;}
+.hist h3{margin:0 0 8px;font-size:15px;}
+.hrow{display:flex;gap:10px;padding:9px 2px;border-bottom:1px solid #f0efe9;}
+.hrow:last-child{border-bottom:0;}
+.hrow .hb{flex:0 0 26px;height:26px;display:grid;place-items:center;border-radius:50%;background:#fbe7dd;color:#c36138;font-weight:900;}
+.hrow .hb.in{background:var(--soft);color:var(--green);}
+.hrow .hm{flex:1;min-width:0;}
+.hrow .hm b{font-size:14px;}
+.hrow .hm small{display:block;color:var(--muted);font-size:11px;}
+.camwrap{position:fixed;inset:0;z-index:50;background:#000;display:flex;flex-direction:column;}
+.camwrap video{flex:1;width:100%;object-fit:cover;}
+.camtop{position:absolute;top:0;left:0;right:0;padding:16px;display:flex;justify-content:space-between;align-items:center;color:#fff;background:linear-gradient(rgba(0,0,0,.55),transparent);}
+.camtop .t{font-size:15px;font-weight:700;}
+.camtop button{border:0;background:rgba(255,255,255,.2);color:#fff;border-radius:10px;padding:10px 14px;font-size:15px;}
+.camframe{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:74%;max-width:360px;height:200px;border:3px solid rgba(255,255,255,.9);border-radius:16px;box-shadow:0 0 0 100vmax rgba(0,0,0,.35);}
+.cammsg{position:absolute;bottom:40px;left:0;right:0;text-align:center;color:#fff;font-size:15px;padding:0 20px;}
+.spinner{display:inline-block;width:16px;height:16px;border:3px solid rgba(0,0,0,.15);border-top-color:var(--green);border-radius:50%;animation:sp 1s linear infinite;vertical-align:-3px;}
+@keyframes sp{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
 <main>
   <header class="topbar">
-    <div><p class="eyebrow">형제상사 · 외도창고</p><h1>재고 가져오기</h1></div>
-    <span id="status" class="status connected"><i></i>서버 연결됨</span>
+    <div><p class="eyebrow">형제상사</p><h1>창고재고</h1></div>
+    <span id="status" class="status"><i></i>연결 중…</span>
   </header>
-
-  <section class="hero">
-    <p>외도창고에서 노형점으로 가져갈 상품을 검색하세요.</p>
-    <label class="search"><span>⌕</span><input id="search" placeholder="상품명 · 관리코드 · 바코드 검색" aria-label="상품 검색" /></label>
-  </section>
-
-  <button id="notice" class="notice" style="display:none" aria-label="알림 닫기"></button>
-
+  <div class="searchbar">
+    <label class="search"><span>⌕</span><input id="search" inputmode="search" placeholder="제품명 / 바코드 검색" aria-label="제품 검색" /></label>
+    <button id="camBtn" class="cam" aria-label="바코드 스캔">▣</button>
+  </div>
+  <div id="notice"></div>
   <section class="content">
-    <div class="section-title"><h2 id="listTitle">외도창고 상품</h2><span id="listCount">조회 중</span></div>
-    <div id="productList" class="product-list"></div>
-    <div id="recent"></div>
+    <div class="section-title"><h2 id="listTitle">제품</h2><span id="listCount"></span></div>
+    <div id="list" class="list"></div>
+    <div id="hint" class="hint">제품명 일부를 입력하거나<br>카메라(▣)로 바코드를 스캔하세요.</div>
   </section>
-
-  <section class="content" id="stockView" style="display:none">
-    <div class="section-title"><h2>최종재고 현황</h2><span id="stockCount">조회 중</span></div>
-    <div id="stockList" class="stock-list"></div>
-  </section>
-
-  <nav class="bottom-nav">
-    <button id="navSearch" class="active"><span>⌕</span>상품 검색</button>
-    <button id="navStock"><span>▤</span>최종재고</button>
-    <button id="navSettings"><span>⚙</span>설정</button>
-  </nav>
 </main>
-
 <div id="sheetRoot"></div>
-
+<div id="camRoot"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zxing-js-library/0.21.3/index.min.js" defer></script>
 <script>
-const SUPABASE_URL = "https://rvlntxsrxlqymgjqhnxb.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2bG50eHNyeGxxeW1nanFobnhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3ODczODUsImV4cCI6MjEwMTM2MzM4NX0.3psfGR-kjMVVvegNiFYrmWQVbF1rM3PRI_nxV5huDrU";
-const headers = () => ({ apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" });
-
-let products = [], selected = null, quantity = 1, movementType = "INBOUND", movements = [], loading = false, query = "";
-let searchTimer = null;
-let history = [], historyLoading = false;
-
-const isInbound = (t) => String(t).startsWith("INBOUND");
-
+const CONFIG = {
+  SUPABASE_URL: "https://rvlntxsrxlqymgjqhnxb.supabase.co",
+  SUPABASE_PUBLISHABLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2bG50eHNyeGxxeW1nanFobnhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3ODczODUsImV4cCI6MjEwMTM2MzM4NX0.3psfGR-kjMVVvegNiFYrmWQVbF1rM3PRI_nxV5huDrU",
+};
+const WH_ORDER = ["NH_INNER", "OEDO"];
 const $ = (id) => document.getElementById(id);
-const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
-
-function setNotice(msg) {
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+const hdr = () => ({ apikey: CONFIG.SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${CONFIG.SUPABASE_PUBLISHABLE_KEY}`, "Content-Type": "application/json" });
+const rest = (path) => `${CONFIG.SUPABASE_URL}/rest/v1/${path}`;
+async function api(path, opts) {
+  const res = await fetch(rest(path), { headers: hdr(), ...(opts || {}) });
+  if (!res.ok) { let m = "서버 오류"; try { const b = await res.json(); m = b?.message || b?.hint || m; } catch {} throw new Error(m); }
+  return res.status === 204 ? null : res.json();
+}
+async function rpc(fn, body) {
+  const res = await fetch(rest(`rpc/${fn}`), { method: "POST", headers: hdr(), body: JSON.stringify(body) });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || "처리에 실패했습니다.");
+  return data;
+}
+function notice(kind, msg) {
   const el = $("notice");
-  if (!msg) { el.style.display = "none"; return; }
-  el.innerHTML = `${esc(msg)}<span>×</span>`;
-  el.style.display = "flex";
+  if (!msg) { el.innerHTML = ""; return; }
+  el.innerHTML = `<button class="notice ${kind}" onclick="document.getElementById('notice').innerHTML=''">${esc(msg)}<span>×</span></button>`;
 }
-$("notice").onclick = () => setNotice("");
-
-async function loadProducts() {
-  loading = true;
-  renderList();
-  const term = query.trim().replace(/[%,()]/g, "");
-  // 검색어가 없으면 재고가 있는 상품만(서버 필터), 검색 시에는 전체 DB 대상
-  const filter = term
-    ? `&or=(product_name.ilike.*${encodeURIComponent(term)}*,product_code.ilike.*${encodeURIComponent(term)}*,barcode.ilike.*${encodeURIComponent(term)}*,search_keywords.ilike.*${encodeURIComponent(term)}*)`
-    : "&warehouse_stock=gt.0";
+let WAREHOUSES = [], WH_BY_ID = {}, WH_BY_CODE = {}, STAFF = [];
+let selected = null, selWh = null, quantity = 1, searchTimer = null;
+async function init() {
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=id,product_code,product_name,unit,category,warehouse_stock&active=eq.true${filter}&order=product_name&limit=30`, { headers: headers() });
-    if (!res.ok) throw new Error("상품을 불러오지 못했습니다.");
-    products = await res.json();
-    // 재고가 있는 상품을 최상단으로, 그 안에서는 가나다순
-    products.sort((a, b) => {
-      const ai = a.warehouse_stock > 0 ? 0 : 1, bi = b.warehouse_stock > 0 ? 0 : 1;
-      if (ai !== bi) return ai - bi;
-      return String(a.product_name).localeCompare(String(b.product_name), "ko");
-    });
+    const [wh, staff] = await Promise.all([
+      api("warehouses?select=id,code,warehouse_name,sort_order&active=eq.true&order=sort_order"),
+      api("staff?select=id,staff_name&active=eq.true&order=sort_order"),
+    ]);
+    WAREHOUSES = wh; STAFF = staff; WH_BY_ID = {}; WH_BY_CODE = {};
+    wh.forEach((w) => { WH_BY_ID[w.id] = w; WH_BY_CODE[w.code] = w; });
+    $("status").className = "status ok"; $("status").innerHTML = "<i></i>서버 연결됨";
+    loadProducts("");
   } catch (e) {
-    setNotice(e.message || "연결 오류가 발생했습니다.");
-    products = [];
-  } finally {
-    loading = false;
-    renderList();
+    $("status").className = "status"; $("status").innerHTML = "<i></i>연결 실패";
+    notice("err", "서버 연결 실패: " + e.message);
   }
 }
-
-$("search").addEventListener("input", (e) => {
-  query = e.target.value;
-  $("listTitle").textContent = query ? "검색 결과" : "외도창고 상품";
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(loadProducts, 300);
-});
-
-/* ===== 최종재고 페이지 ===== */
-let view = "search", stockItems = [], stockLoading = false;
-
-function setView(v) {
-  view = v;
-  const search = v === "search";
-  $("productList").parentElement.style.display = search ? "" : "none";
-  document.querySelector(".hero").style.display = search ? "" : "none";
-  $("stockView").style.display = v === "stock" ? "" : "none";
-  $("navSearch").classList.toggle("active", search);
-  $("navStock").classList.toggle("active", v === "stock");
-  $("navSettings").classList.toggle("active", v === "settings");
-  if (v === "stock") loadStock();
+function stocksFromInventory(inv) {
+  const s = {}; WH_ORDER.forEach((c) => s[c] = 0);
+  (inv || []).forEach((r) => { const w = WH_BY_ID[r.warehouse_id]; if (w) s[w.code] = Number(r.quantity) || 0; });
+  return s;
 }
-
-async function loadStock() {
-  stockLoading = true; renderStock();
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=id,product_code,product_name,unit,category,warehouse_stock&active=eq.true&warehouse_stock=gt.0&order=product_name&limit=1000`, { headers: headers() });
-    if (!res.ok) throw new Error("최종재고를 불러오지 못했습니다.");
-    stockItems = await res.json();
-    stockItems.sort((a, b) => String(a.product_name).localeCompare(String(b.product_name), "ko"));
-  } catch (e) {
-    setNotice(e.message || "연결 오류가 발생했습니다.");
-    stockItems = [];
-  } finally {
-    stockLoading = false; renderStock();
-  }
-}
-
-function renderStock() {
-  $("stockCount").textContent = stockLoading ? "조회 중" : `${stockItems.length}개 품목`;
-  const el = $("stockList");
-  if (stockLoading) { el.innerHTML = `<div class="empty" style="padding:40px 0">불러오는 중…</div>`; return; }
-  if (stockItems.length === 0) { el.innerHTML = `<div class="empty" style="padding:40px 0">재고가 있는 상품이 없습니다.</div>`; return; }
-  el.innerHTML = stockItems.map((p) => `
-    <button class="srow" data-id="${esc(p.id)}">
-      <div class="sname"><strong>${esc(p.product_name)}</strong><small>${esc(p.product_code)} · ${esc(p.category ?? "기타")}</small></div>
-      <span class="sqty ${p.warehouse_stock <= 3 ? "low" : ""}"><b>${p.warehouse_stock}</b><small>${esc(p.unit)}</small></span>
-    </button>`).join("");
-  el.querySelectorAll(".srow").forEach((btn) => {
-    btn.onclick = () => openSheet(stockItems.find((p) => String(p.id) === btn.dataset.id));
+function buildSearchFilter(term) {
+  const tokens = term.toLowerCase().split(/\s+/).filter(Boolean);
+  if (!tokens.length) return "";
+  const groups = tokens.map((t) => {
+    const v = encodeURIComponent(`*${t}*`);
+    return `or(product_name.ilike.${v},barcode.ilike.${v},product_code.ilike.${v},category.ilike.${v},search_keywords.ilike.${v})`;
   });
+  return `&and=(${groups.join(",")})`;
 }
-
-$("navSearch").onclick = () => setView("search");
-$("navStock").onclick = () => setView("stock");
-$("navSettings").onclick = () => setNotice("설정 기능은 준비 중입니다.");
-
-function renderList() {
-  $("listCount").textContent = loading ? "조회 중" : `${products.length}개 표시`;
-  const list = $("productList");
-  if (!loading && products.length === 0) {
-    list.innerHTML = `<div class="empty">일치하는 상품이 없습니다.</div>`;
-  } else {
-    list.innerHTML = products.map((p) => `
-      <button class="product" data-id="${esc(p.id)}">
-        <span class="category">${esc(p.category ?? "기타")}</span>
-        <span class="product-copy"><strong>${esc(p.product_name)}</strong><small>${esc(p.product_code)} · 단위 ${esc(p.unit)}</small></span>
-        <span class="${p.warehouse_stock <= 3 ? "stock low" : "stock"}"><b>${p.warehouse_stock}</b><small>${esc(p.unit)}</small></span>
-      </button>`).join("");
-    list.querySelectorAll(".product").forEach((btn) => {
-      btn.onclick = () => openSheet(products.find((p) => String(p.id) === btn.dataset.id));
-    });
-  }
-  renderRecent();
-}
-
-function renderRecent() {
-  const el = $("recent");
-  if (movements.length === 0) { el.innerHTML = ""; return; }
-  el.innerHTML = `<div class="recent"><div class="section-title"><h2>최근 기록</h2><span>이 기기</span></div>${
-    movements.slice(0, 3).map((m) => `<div class="movement"><span class="${m.movement_type === "INBOUND" ? "check inbound" : "check"}">${m.movement_type === "INBOUND" ? "+" : "−"}</span><div><strong>${esc(m.product_name)}</strong><small>${m.movement_type === "INBOUND" ? "외도창고 입고" : "노형점 가져오기"} · ${esc(m.staff_name)} · ${m.quantity}개 · ${new Date(m.created_at).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</small></div></div>`).join("")
-  }</div>`;
-}
-
-function openSheet(p) {
-  if (!p) return;
-  selected = p; quantity = 1; movementType = "INBOUND";
-  renderSheet();
-  loadHistory(p.id);
-}
-
-async function loadHistory(productId) {
-  history = []; historyLoading = true;
-  renderSheet();
+async function loadProducts(term) {
+  const q = (term ?? "").trim();
+  $("listTitle").textContent = q ? "검색 결과" : "제품";
+  $("hint").style.display = q ? "none" : "";
+  $("listCount").innerHTML = '<span class="spinner"></span>';
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/stock_movements?select=quantity,staff_name,movement_type,before_stock,after_stock,created_at&product_id=eq.${productId}&order=created_at.desc&limit=50`, { headers: headers() });
-    if (!res.ok) throw new Error();
-    history = await res.json();
-  } catch (e) {
-    history = [];
-  } finally {
-    historyLoading = false;
-    if (selected && String(selected.id) === String(productId)) renderSheet();
-  }
+    const filter = q ? buildSearchFilter(q) : "";
+    const sel = "select=id,product_code,barcode,product_name,unit,category,inventory(warehouse_id,quantity)";
+    const rows = await api(`products?${sel}&active=eq.true${filter}&order=product_name&limit=40`);
+    renderList(rows, q);
+  } catch (e) { $("listCount").textContent = ""; notice("err", "검색 오류: " + e.message); }
 }
-
-function historyHTML() {
-  let rows;
-  if (historyLoading) {
-    rows = `<div class="empty">이동기록 조회 중…</div>`;
-  } else if (history.length === 0) {
-    rows = `<div class="empty">이동기록이 없습니다.</div>`;
-  } else {
-    rows = history.map((m) => {
-      const inb = isInbound(m.movement_type);
-      const d = new Date(m.created_at);
-      const when = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")} ${d.toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})}`;
-      return `<div class="hrow">
-        <span class="hbadge" style="${inb ? "" : "background:#fbe7dd;color:#c36138"}">${inb ? "+" : "−"}</span>
-        <div class="hmeta"><strong>${inb ? "외도창고 입고" : "노형점 가져오기"}</strong><small>${esc(m.staff_name)} · ${when} · 재고 ${m.before_stock}→${m.after_stock}</small></div>
-        <span class="hqty" style="color:${inb ? "var(--green)" : "#c36138"}">${inb ? "+" : "−"}${m.quantity}</span>
-      </div>`;
-    }).join("");
-  }
-  return `<div class="history"><div class="history-title"><h3>이동기록</h3><span>${historyLoading ? "" : history.length + "건"}</span></div><div class="history-scroll">${rows}</div></div>`;
+function renderList(rows, q) {
+  $("listCount").textContent = `${rows.length}개`;
+  const el = $("list");
+  if (!rows.length) { el.innerHTML = q ? `<div class="empty">일치하는 제품이 없습니다.</div>` : ""; return; }
+  el.innerHTML = rows.map((p) => {
+    const s = stocksFromInventory(p.inventory);
+    return `<button class="card" data-id="${esc(p.id)}"><div class="pname">${esc(p.product_name)}</div><div class="pspec">${esc(p.category || "")}${p.category ? " · " : ""}${esc(p.product_code)}</div><div class="whrow">${WH_ORDER.map((c) => whBox(c, s[c], p.unit)).join("")}</div></button>`;
+  }).join("");
+  el.querySelectorAll(".card").forEach((b) => { b.onclick = () => { const p = rows.find((x) => String(x.id) === b.dataset.id); openSheet(p, stocksFromInventory(p.inventory)); }; });
 }
-function closeSheet() { selected = null; renderSheet(); }
-
+function whBox(code, qty, unit) {
+  const w = WH_BY_CODE[code]; if (!w) return "";
+  return `<div class="whbox ${qty <= 0 ? "zero" : ""}"><div class="wl">${esc(w.warehouse_name)}</div><div class="wv">${qty}<small>${esc(unit || "")}</small></div></div>`;
+}
+$("search").addEventListener("input", (e) => { clearTimeout(searchTimer); searchTimer = setTimeout(() => loadProducts(e.target.value), 280); });
+function openSheet(product, stocks) {
+  selected = { product, stocks };
+  selWh = WH_ORDER.find((c) => stocks[c] > 0) || WH_ORDER[0];
+  quantity = 1; renderSheet(); loadHistory(product.id);
+}
+function closeSheet() { selected = null; $("sheetRoot").innerHTML = ""; }
 function renderSheet() {
-  const root = $("sheetRoot");
-  if (!selected) { root.innerHTML = ""; return; }
-  const s = selected;
-  const overStock = movementType === "OUTBOUND" && quantity > s.warehouse_stock;
-  root.innerHTML = `
-  <div class="sheet-backdrop" id="backdrop"><form class="sheet" id="sheet">
+  if (!selected) { $("sheetRoot").innerHTML = ""; return; }
+  const p = selected.product, s = selected.stocks;
+  const max = s[selWh] || 0;
+  const lastStaff = localStorage.getItem("oedo-staff-id") || "";
+  const over = quantity > max;
+  const canSubmit = STAFF.length > 0 && max > 0 && quantity >= 1 && !over;
+  $("sheetRoot").innerHTML = `
+  <div class="backdrop" id="bd"><form class="sheet" id="sheet" autocomplete="off">
     <div class="handle"></div>
-    <div class="sheet-head"><div><p>${esc(s.product_code)}</p><h2>${esc(s.product_name)}</h2></div><button type="button" id="closeBtn" aria-label="닫기">×</button></div>
-    <div class="availability"><span>외도창고 현재고</span><strong>${s.warehouse_stock}${esc(s.unit)}</strong></div>
-    <div class="movement-tabs" role="group" aria-label="재고 처리 유형">
-      <button type="button" id="tabIn" class="${movementType === "INBOUND" ? "active" : ""}">＋ 외도창고 입고</button>
-      <button type="button" id="tabOut" class="${movementType === "OUTBOUND" ? "active" : ""}">− 노형점 가져오기</button>
+    <div class="sheet-head"><div><p class="code">${esc(p.product_code)}${p.barcode ? " · " + esc(p.barcode) : ""}</p><h2>${esc(p.product_name)}</h2></div><button type="button" class="x" id="x">×</button></div>
+    <div class="field"><label>어느 창고에서 가져오나요?</label>
+      <div class="big-wh">${WH_ORDER.map((c) => { const w = WH_BY_CODE[c]; const q = s[c] || 0; return `<button type="button" class="whpick ${c === selWh ? "sel" : ""}" data-c="${c}" ${q <= 0 ? "disabled" : ""}><div class="l">${esc(w ? w.warehouse_name : c)}</div><div class="v">${q}<small>${esc(p.unit || "")}</small></div></button>`; }).join("")}</div>
     </div>
-    <label class="field"><span>담당자</span><input id="staff" placeholder="이름 입력" required /></label>
-    <div class="field"><span>${movementType === "INBOUND" ? "입고 수량" : "가져올 수량"}</span><div class="stepper"><button type="button" id="minus">−</button><input id="qtyInput" type="number" inputmode="numeric" pattern="[0-9]*" min="1" value="${quantity}" /><button type="button" id="plus">＋</button></div></div>
-    <button class="primary ${movementType === "INBOUND" ? "inbound" : ""}" id="submitBtn" ${loading || overStock ? "disabled" : ""}>${loading ? "처리 중…" : movementType === "INBOUND" ? `외도창고에 ${quantity}${esc(s.unit)} 입고` : `노형점으로 ${quantity}${esc(s.unit)} 가져오기`}</button>
-    ${historyHTML()}
+    <div class="field"><label>가져올 수량 (최대 ${max}${esc(p.unit || "")})</label>
+      <div class="stepper"><button type="button" id="minus">−</button><input id="qty" type="number" inputmode="numeric" pattern="[0-9]*" min="1" max="${max}" value="${quantity}" /><button type="button" id="plus">＋</button></div>
+      ${over ? `<div class="warn">현재 ${esc(WH_BY_CODE[selWh]?.warehouse_name)} 재고는 ${max}${esc(p.unit || "")}입니다.</div>` : ""}
+      ${max <= 0 ? `<div class="warn">이 창고에는 재고가 없습니다.</div>` : ""}
+    </div>
+    <div class="field"><label>담당자</label>
+      <select class="staff" id="staff">${STAFF.length ? STAFF.map((st) => `<option value="${esc(st.id)}" ${st.id === lastStaff ? "selected" : ""}>${esc(st.staff_name)}</option>`).join("") : `<option value="">담당자 없음 (staff 등록 필요)</option>`}</select>
+    </div>
+    <button class="primary" id="submit" ${canSubmit ? "" : "disabled"}>가져오기 완료</button>
+    <div class="hist"><h3>이동기록</h3><div id="histBox"><div class="empty" style="padding:16px 0">불러오는 중…</div></div></div>
   </form></div>`;
-
-  const staffVal = root._staff || "";
-  $("staff").value = staffVal;
-  $("staff").oninput = (e) => { root._staff = e.target.value; };
-  $("backdrop").onclick = closeSheet;
+  $("bd").onclick = closeSheet;
   $("sheet").onclick = (e) => e.stopPropagation();
-  $("closeBtn").onclick = closeSheet;
-  $("tabIn").onclick = () => { movementType = "INBOUND"; renderSheet(); };
-  $("tabOut").onclick = () => { movementType = "OUTBOUND"; quantity = Math.min(quantity, s.warehouse_stock || 1); renderSheet(); };
-  $("minus").onclick = () => { quantity = Math.max(1, quantity - 1); renderSheet(); };
-  $("plus").onclick = () => { quantity = movementType === "INBOUND" ? quantity + 1 : Math.min(s.warehouse_stock, quantity + 1); renderSheet(); };
-  const qi = $("qtyInput");
-  // 직접 입력 시에는 포커스 유지를 위해 전체 재렌더 없이 값만 갱신
-  qi.oninput = () => {
-    let v = parseInt(qi.value.replace(/[^0-9]/g, ""), 10);
-    if (isNaN(v)) return; // 입력 도중 빈칸 허용
-    if (movementType === "OUTBOUND") v = Math.min(v, s.warehouse_stock);
-    quantity = Math.max(1, v);
-    const over = movementType === "OUTBOUND" && quantity > s.warehouse_stock;
-    const sb = $("submitBtn");
-    sb.disabled = loading || over;
-    sb.textContent = loading ? "처리 중…" : movementType === "INBOUND" ? `외도창고에 ${quantity}${s.unit} 입고` : `노형점으로 ${quantity}${s.unit} 가져오기`;
-  };
-  qi.onblur = () => { if (!qi.value || parseInt(qi.value, 10) < 1) { quantity = 1; renderSheet(); } };
-  qi.onfocus = () => qi.select();
-  $("sheet").onsubmit = submitMovement;
+  $("x").onclick = closeSheet;
+  $("sheet").querySelectorAll(".whpick").forEach((b) => b.onclick = () => { selWh = b.dataset.c; quantity = Math.min(quantity, s[selWh] || 1) || 1; renderSheet(); });
+  $("minus").onclick = () => { quantity = Math.max(1, quantity - 1); syncQty(); };
+  $("plus").onclick = () => { quantity = Math.min(max || 1, quantity + 1); syncQty(); };
+  $("qty").oninput = (e) => { let v = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10); if (isNaN(v)) return; quantity = Math.max(1, v); syncQtyBtn(); };
+  $("qty").onblur = () => { if (!$("qty").value || quantity < 1) { quantity = 1; } quantity = Math.min(quantity, max || 1); renderSheet(); };
+  $("staff").onchange = (e) => localStorage.setItem("oedo-staff-id", e.target.value);
+  $("sheet").onsubmit = doTakeOut;
+  renderHistoryBox();
 }
-
-async function submitMovement(e) {
+function syncQty() { const i = $("qty"); if (i) i.value = quantity; syncQtyBtn(); }
+function syncQtyBtn() { const max = selected.stocks[selWh] || 0, over = quantity > max; const btn = $("submit"); if (btn) btn.disabled = !(STAFF.length && max > 0 && quantity >= 1 && !over); }
+async function doTakeOut(e) {
   e.preventDefault();
-  const staff = ($("sheetRoot")._staff || "").trim();
-  if (!selected || !staff || quantity < 1) return;
-  loading = true; renderSheet();
+  if (!selected) return;
+  const p = selected.product, max = selected.stocks[selWh] || 0;
+  const staffId = $("staff").value;
+  if (!staffId) { notice("err", "담당자를 선택하세요. (staff 테이블에 직원을 등록하세요)"); return; }
+  if (quantity < 1 || quantity > max) { renderSheet(); return; }
+  const wh = WH_BY_CODE[selWh];
+  const btn = $("submit"); btn.disabled = true; btn.textContent = "처리 중…";
   try {
-    const rpc = movementType === "INBOUND" ? "receive_to_warehouse" : "take_from_warehouse";
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${rpc}`, {
-      method: "POST", headers: headers(),
-      body: JSON.stringify({ p_product_id: selected.id, p_quantity: quantity, p_staff_name: staff }),
-    });
-    const body = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(body?.message ?? "등록에 실패했습니다.");
-    movements.unshift({ product_name: selected.product_name, quantity, staff_name: staff, created_at: new Date().toISOString(), movement_type: movementType });
-    setNotice(`${selected.product_name} ${quantity}${selected.unit} ${movementType === "INBOUND" ? "입고" : "가져오기"} 완료`);
-    selected = null;
-    query = ""; $("search").value = ""; $("listTitle").textContent = "외도창고 상품";
-    await loadProducts();
-    if (view === "stock") loadStock();
-  } catch (err) {
-    setNotice(err.message || "등록 오류가 발생했습니다.");
-  } finally {
-    loading = false;
-    renderSheet();
-  }
+    const r = await rpc("take_out_stock", { p_product_id: p.id, p_warehouse_id: wh.id, p_quantity: quantity, p_staff_id: staffId });
+    localStorage.setItem("oedo-staff-id", staffId);
+    notice("ok", `${r.product_name} · ${r.warehouse_name}에서 ${r.quantity}${r.unit || ""} 가져오기 완료 (${r.before_stock}→${r.after_stock})`);
+    closeSheet(); loadProducts($("search").value);
+  } catch (err) { btn.disabled = false; btn.textContent = "가져오기 완료"; notice("err", err.message); await refreshSelectedStocks(); }
 }
-
-loadProducts();
+async function refreshSelectedStocks() {
+  if (!selected) return;
+  try {
+    const rows = await api(`products?select=id,unit,inventory(warehouse_id,quantity)&id=eq.${selected.product.id}&limit=1`);
+    if (rows && rows[0]) { selected.stocks = stocksFromInventory(rows[0].inventory); renderSheet(); loadHistory(selected.product.id); }
+  } catch {}
+}
+let HISTORY = [], histLoading = false;
+async function loadHistory(pid) {
+  HISTORY = []; histLoading = true; renderHistoryBox();
+  try { HISTORY = await api(`stock_movements?select=quantity,staff_name,movement_type,before_stock,after_stock,created_at,warehouses(warehouse_name)&product_id=eq.${pid}&order=created_at.desc&limit=30`); } catch { HISTORY = []; }
+  histLoading = false; renderHistoryBox();
+}
+function renderHistoryBox() {
+  const box = $("histBox"); if (!box) return;
+  if (histLoading) { box.innerHTML = `<div class="empty" style="padding:16px 0">불러오는 중…</div>`; return; }
+  if (!HISTORY.length) { box.innerHTML = `<div class="empty" style="padding:16px 0">이동기록이 없습니다.</div>`; return; }
+  box.innerHTML = HISTORY.map((m) => {
+    const out = m.movement_type === "TAKE_OUT";
+    const d = new Date(m.created_at);
+    const when = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")} ${d.toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})}`;
+    const wh = m.warehouses?.warehouse_name || "";
+    return `<div class="hrow"><span class="hb ${out ? "" : "in"}">${out ? "−" : "+"}</span><div class="hm"><b>${esc(wh)}에서 ${m.quantity} ${out ? "가져옴" : "입고"}</b><small>${esc(when)} · ${esc(m.staff_name)} · 재고 ${m.before_stock}→${m.after_stock}</small></div></div>`;
+  }).join("");
+}
+let camStream = null, zxingReader = null, detectLoop = null, scanBusy = false;
+$("camBtn").onclick = startScan;
+function openCamUI() {
+  $("camRoot").innerHTML = `<div class="camwrap"><video id="cam" playsinline muted autoplay></video><div class="camframe"></div><div class="camtop"><div class="t">바코드를 사각형 안에 맞춰주세요</div><button id="camClose">닫기</button></div><div class="cammsg" id="camMsg">카메라 준비 중…</div></div>`;
+  $("camClose").onclick = stopScan;
+}
+function camMsg(t) { const e = $("camMsg"); if (e) e.textContent = t; }
+async function startScan() {
+  notice("", "");
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { notice("err", "이 브라우저/환경에서는 카메라를 쓸 수 없습니다. 제품명으로 검색하세요."); return; }
+  if (!window.isSecureContext) { notice("err", "카메라는 HTTPS 환경에서만 동작합니다. https 주소로 접속하세요."); return; }
+  openCamUI();
+  try { camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false }); }
+  catch (e) { stopScan(); notice("err", e.name === "NotAllowedError" ? "카메라 권한이 거부되었습니다. 제품명으로 검색하세요." : "카메라를 열 수 없습니다: " + e.message); return; }
+  const video = $("cam"); if (!video) { stopScan(); return; }
+  video.srcObject = camStream; await video.play().catch(() => {});
+  camMsg("스캔 중…");
+  if ("BarcodeDetector" in window) runNativeDetector(video); else runZXing(video);
+}
+async function runNativeDetector(video) {
+  let formats = ["ean_13","ean_8","code_128","code_39","qr_code","upc_a","upc_e"];
+  try { const sup = await window.BarcodeDetector.getSupportedFormats(); formats = formats.filter((f) => sup.includes(f)); } catch {}
+  const detector = new window.BarcodeDetector({ formats });
+  detectLoop = setInterval(async () => {
+    if (scanBusy || !camStream) return;
+    try { const codes = await detector.detect(video); if (codes && codes.length) { onScanned(codes[0].rawValue); } } catch {}
+  }, 350);
+}
+function runZXing(video) {
+  if (!window.ZXing) { camMsg("바코드 라이브러리 로딩 실패 — 제품명으로 검색하세요."); return; }
+  try { zxingReader = new window.ZXing.BrowserMultiFormatReader(); zxingReader.decodeFromVideoElement(video, (result) => { if (result && !scanBusy) onScanned(result.getText()); }); }
+  catch (e) { camMsg("스캔을 시작할 수 없습니다."); }
+}
+function stopScan() {
+  if (detectLoop) { clearInterval(detectLoop); detectLoop = null; }
+  if (zxingReader) { try { zxingReader.reset(); } catch {} zxingReader = null; }
+  if (camStream) { camStream.getTracks().forEach((t) => t.stop()); camStream = null; }
+  $("camRoot").innerHTML = ""; scanBusy = false;
+}
+async function onScanned(rawValue) {
+  const code = String(rawValue || "").trim();
+  if (!code || scanBusy) return;
+  scanBusy = true; camMsg(`조회 중… (${code})`);
+  try {
+    const rows = await api(`products?select=id,product_code,barcode,product_name,unit,category,inventory(warehouse_id,quantity)&barcode=eq.${encodeURIComponent(code)}&active=eq.true&limit=1`);
+    if (rows && rows.length) {
+      const p = rows[0]; stopScan();
+      $("search").value = p.product_name; $("listTitle").textContent = "스캔 결과"; $("hint").style.display = "none";
+      renderList([p], p.product_name);
+      openSheet(p, stocksFromInventory(p.inventory));
+      $("sheetRoot").scrollIntoView({ behavior: "smooth" });
+    } else { stopScan(); showUnregistered(code); }
+  } catch (e) { scanBusy = false; camMsg("조회 오류 — 다시 시도하세요."); setTimeout(() => { scanBusy = false; camMsg("스캔 중…"); }, 1200); }
+}
+function showUnregistered(code) {
+  $("sheetRoot").innerHTML = `<div class="backdrop" id="bd"><div class="sheet"><div class="handle"></div><div class="sheet-head"><div><p class="code">미등록 바코드</p><h2>등록되지 않은 상품입니다</h2></div><button type="button" class="x" id="x">×</button></div><p style="margin:14px 0;color:#555">스캔 바코드: <b>${esc(code)}</b></p><button class="primary" id="toSearch">제품명으로 검색</button></div></div>`;
+  $("bd").onclick = () => $("sheetRoot").innerHTML = "";
+  $("x").onclick = () => $("sheetRoot").innerHTML = "";
+  $("toSearch").onclick = () => { $("sheetRoot").innerHTML = ""; $("search").focus(); };
+}
+init();
 </script>
 </body>
 </html>
